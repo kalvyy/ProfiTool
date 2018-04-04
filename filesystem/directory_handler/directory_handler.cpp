@@ -7,7 +7,7 @@
 
 static const unsigned int DOT_DIRECTORY_AMOUNT = 2;
 
-static unsigned int getAmountOfFilesInDirectory(const char * const directoryPath)
+static unsigned int getAmountOfEntriesInDirectory(const char * const directoryPath)
 {
     DIR * directoryHandle = opendir(directoryPath);
     if(NULL == directoryHandle)
@@ -27,7 +27,8 @@ static unsigned int getAmountOfFilesInDirectory(const char * const directoryPath
 }
 
 
-static void getDirectoryContent(const char * const directoryPath, DirectoryContent * resultDirectoryContent)
+static void getDirectoryContent(const char * const directoryPath, DirectoryContent * resultDirectoryContent,
+                                FilterFunction filter)
 {
     DIR * directoryHandle = opendir(directoryPath);
     if(NULL == directoryHandle || NULL == resultDirectoryContent)
@@ -35,23 +36,32 @@ static void getDirectoryContent(const char * const directoryPath, DirectoryConte
         return;
     }
 
-    resultDirectoryContent->size = getAmountOfFilesInDirectory(directoryPath);
-    resultDirectoryContent->directoryFiles = (DirectoryFile *)malloc(sizeof(DirectoryFile) * resultDirectoryContent->size );
+    unsigned int maxContentSize = 1;
+    resultDirectoryContent->directoryEntries = (struct dirent *)malloc(sizeof(struct dirent) * maxContentSize);
+    resultDirectoryContent->size = 0;
 
-    struct dirent * currentProcessingFile = NULL;
-    unsigned int index = 0;
-
-    while(NULL != (currentProcessingFile = readdir(directoryHandle)))
+    struct dirent * currentProcessingEntry = NULL;
+    while(NULL != (currentProcessingEntry = readdir(directoryHandle)))
     {
-        if(0 != strcmp(currentProcessingFile->d_name, ".") &&
-           0 != strcmp(currentProcessingFile->d_name, ".."))
+        if(filter && filter(currentProcessingEntry))
         {
-            DirectoryFile * currentDirectoryContent = &resultDirectoryContent->directoryFiles[index];
-
-            strncpy(currentDirectoryContent->name, currentProcessingFile->d_name, MAX_NAME_LENGTH);
-            currentDirectoryContent->fileType = currentProcessingFile->d_type;
-
-            ++index;
+            if(resultDirectoryContent->size >= maxContentSize)
+            {
+                maxContentSize *= 2;
+                struct dirent * reallocResult = (struct dirent *)realloc(
+                                    resultDirectoryContent->directoryEntries,
+                                    sizeof(struct dirent) * maxContentSize);
+                if(NULL == reallocResult)
+                {
+                    free(resultDirectoryContent->directoryEntries);
+                    resultDirectoryContent->directoryEntries = NULL;
+                    resultDirectoryContent->size = 0;
+                    break;
+                }
+                resultDirectoryContent->directoryEntries = reallocResult;
+            }
+            resultDirectoryContent->directoryEntries[resultDirectoryContent->size] = *currentProcessingEntry;
+            ++resultDirectoryContent->size;
         }
     }
 
@@ -62,14 +72,15 @@ static void getDirectoryContent(const char * const directoryPath, DirectoryConte
 DirectoryHandler * createDirectoryHandler()
 {
     DirectoryHandler * resultDirectoryHandler = (DirectoryHandler *)malloc(sizeof(DirectoryHandler));
-    resultDirectoryHandler->getAmountOfFilesInDirectory = getAmountOfFilesInDirectory;
+    resultDirectoryHandler->getAmountOfEntriesInDirectory = getAmountOfEntriesInDirectory;
     resultDirectoryHandler->getDirectoryContent = getDirectoryContent;
 
     return resultDirectoryHandler;
 }
 
 
-void destroyDirectoryHandler(DirectoryHandler * handlerToDestroy)
+void destroyDirectoryHandler(DirectoryHandler ** handlerToDestroy)
 {
-    free(handlerToDestroy);
+    free(*handlerToDestroy);
+    *handlerToDestroy = NULL;
 }

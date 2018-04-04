@@ -2,36 +2,29 @@
 #define DIRECTORYHANDLER_H
 
 
-#include <limits.h>
-
-//Max file/directory name and place for '\0'
-#define MAX_NAME_LENGTH (NAME_MAX + 1)
-
-typedef struct
-{
-    char name[MAX_NAME_LENGTH];
-    unsigned char fileType;
-} DirectoryFile;
+#include <dirent.h>
 
 
-//DIRECTORY CONTENT
+typedef char (*FilterFunction)(const struct dirent * fileEntry);
+
 typedef struct
 {
     unsigned int size;
-    DirectoryFile * directoryFiles;
+    struct dirent * directoryEntries;
 } DirectoryContent;
 
 
 //DIRECTORY HANDLER
 typedef struct
 {
-    unsigned int (*getAmountOfFilesInDirectory)(const char * const directoryPath);
-    void (*getDirectoryContent)(const char * const directoryPath, DirectoryContent * resultDirectoryContent);
+    unsigned int (*getAmountOfEntriesInDirectory)(const char * const directoryPath);
+    void (*getDirectoryContent)(const char * const directoryPath, DirectoryContent * resultDirectoryContent,
+            FilterFunction filter);
 } DirectoryHandler;
 
 
 DirectoryHandler * createDirectoryHandler();
-void destroyDirectoryHandler(DirectoryHandler * handlerToDestroy);
+void destroyDirectoryHandler(DirectoryHandler ** handlerToDestroy);
 
 
 #endif // DIRECTORYHANDLER_H
