@@ -1,1 +1,2 @@
-#include "filters.h"
+#include <string.h>
+#include <dirent.h>

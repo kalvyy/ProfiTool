@@ -1,7 +1,7 @@
 #include <iostream>
 #include <QCoreApplication>
 #include "filesystem/directory_handler/directory_handler.h"
-
+#include "filesystem/directory_handler/filters/filters.h"
 
 char filter(const struct dirent * fileEntry)
 {
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     destroyDirectoryHandler(&h);
 
 
-    std::cout << content.size<<std::endl;
+    std::cout << "Entries in directory: " << content.size<<std::endl;
     for(unsigned int i = 0; i < content.size; ++i)
     {
         std::cout << content.directoryEntries[i].d_name << std::endl;

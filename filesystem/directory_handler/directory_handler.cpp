@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "directory_handler.h"
+#include "filesystem/directory_handler/directory_handler.h"
 
 
 static const unsigned int DOT_DIRECTORY_AMOUNT = 2;
