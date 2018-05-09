@@ -2,11 +2,6 @@
 #define FILTERS_H
 
 
-typedef enum
-{
-    EXTENSION,
-    FILENAME
-} FilterType;
 
 
 

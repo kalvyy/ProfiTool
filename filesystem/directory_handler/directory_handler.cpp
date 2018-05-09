@@ -27,8 +27,7 @@ static unsigned int getAmountOfEntriesInDirectory(const char * const directoryPa
 }
 
 
-static void getDirectoryContent(const char * const directoryPath, DirectoryContent * resultDirectoryContent,
-                                FilterFunction filter)
+static void getDirectoryContent(const char * const directoryPath, DirectoryContent * resultDirectoryContent)
 {
     DIR * directoryHandle = opendir(directoryPath);
     if(NULL == directoryHandle || NULL == resultDirectoryContent)
@@ -43,26 +42,23 @@ static void getDirectoryContent(const char * const directoryPath, DirectoryConte
     struct dirent * currentProcessingEntry = NULL;
     while(NULL != (currentProcessingEntry = readdir(directoryHandle)))
     {
-        if(filter && filter(currentProcessingEntry))
+        if(resultDirectoryContent->size >= maxContentSize)
         {
-            if(resultDirectoryContent->size >= maxContentSize)
+            maxContentSize *= 2;
+            struct dirent * reallocResult = (struct dirent *)realloc(
+                                resultDirectoryContent->directoryEntries,
+                                sizeof(struct dirent) * maxContentSize);
+            if(NULL == reallocResult)
             {
-                maxContentSize *= 2;
-                struct dirent * reallocResult = (struct dirent *)realloc(
-                                    resultDirectoryContent->directoryEntries,
-                                    sizeof(struct dirent) * maxContentSize);
-                if(NULL == reallocResult)
-                {
-                    free(resultDirectoryContent->directoryEntries);
-                    resultDirectoryContent->directoryEntries = NULL;
-                    resultDirectoryContent->size = 0;
-                    break;
-                }
-                resultDirectoryContent->directoryEntries = reallocResult;
+                free(resultDirectoryContent->directoryEntries);
+                resultDirectoryContent->directoryEntries = NULL;
+                resultDirectoryContent->size = 0;
+                break;
             }
-            resultDirectoryContent->directoryEntries[resultDirectoryContent->size] = *currentProcessingEntry;
-            ++resultDirectoryContent->size;
+            resultDirectoryContent->directoryEntries = reallocResult;
         }
+        resultDirectoryContent->directoryEntries[resultDirectoryContent->size] = *currentProcessingEntry;
+        ++resultDirectoryContent->size;
     }
 
     closedir(directoryHandle);

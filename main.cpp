@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
     DirectoryHandler * h = createDirectoryHandler();
     DirectoryContent content;
-    h->getDirectoryContent("/home/kalvy/Desktop", &content, filter);
+    h->getDirectoryContent("/home/kalvy/Desktop", &content);
     destroyDirectoryHandler(&h);
 
 
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     free(content.directoryEntries);
 
 
-    QCoreApplication a(argc, argv);
+    //QCoreApplication a(argc, argv);
 
-    return a.exec();
+    //return a.exec();
 }

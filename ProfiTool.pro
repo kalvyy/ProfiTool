@@ -20,4 +20,5 @@ SOURCES += main.cpp \
 
 HEADERS += \
     filesystem/directory_handler/directory_handler.h \
-    filesystem/directory_handler/filters/filters.h
+    filesystem/directory_handler/filters/filters.h \
+    utils/types/boolean.h

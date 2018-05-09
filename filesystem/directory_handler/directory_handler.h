@@ -5,8 +5,6 @@
 #include <dirent.h>
 
 
-typedef char (*FilterFunction)(const struct dirent * fileEntry);
-
 typedef struct
 {
     unsigned int size;
@@ -18,8 +16,7 @@ typedef struct
 typedef struct
 {
     unsigned int (*getAmountOfEntriesInDirectory)(const char * const directoryPath);
-    void (*getDirectoryContent)(const char * const directoryPath, DirectoryContent * resultDirectoryContent,
-            FilterFunction filter);
+    void (*getDirectoryContent)(const char * const directoryPath, DirectoryContent * resultDirectoryContent);
 } DirectoryHandler;
 
 
